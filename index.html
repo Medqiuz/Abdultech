@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>AbdulTech — Health Sciences Learning</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a1120">
+  <style>
+    /* ---------- Base Styles (dark theme, mobile‑first) ---------- */
+    :root {
+      --bg: #0a1120;
+      --card: #121e33;
+      --line: #22334f;
+      --txt: #e8eefb;
+      --mut: #8fa3c0;
+      --acc: #22d3ee;
+      --acc2: #34d399;
+      --danger: #f87171;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(1100px 500px at 85% -10%, #0d2b3a, transparent 60%),
+                  radial-gradient(900px 500px at -10% 10%, #0d2233, transparent 55%),
+                  var(--bg);
+      color: var(--txt);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--acc); }
+    button, input, select, textarea { font: inherit; }
+    input, select, textarea {
+      width: 100%; padding: 10px 12px; border-radius: 10px;
+      border: 1px solid var(--line); background: #0c1526; color: var(--txt);
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--acc); }
+    label { display: block; font-size: 12.5px; color: var(--mut); margin: 10px 0 6px; }
+    .wrap { max-width: 1150px; margin: 0 auto; padding: 22px 16px 70px; }
+
+    /* ---------- Top Bar ---------- */
+    .topbar {
+      position: sticky; top: 0; z-index: 30;
+      display: flex; gap: 12px; align-items: center; justify-content: space-between;
+      padding: 11px 16px;
+      background: rgba(10, 17, 32, 0.86);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; cursor: pointer; }
+    .logo {
+      display: grid; place-items: center; width: 30px; height: 30px;
+      border-radius: 9px; background: linear-gradient(135deg, var(--acc), var(--acc2));
+      color: #04121c; font-weight: 900;
+    }
+    nav { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    /* ---------- Buttons & Cards ---------- */
+    .btn {
+      cursor: pointer; border: 1px solid var(--line); background: var(--card);
+      color: var(--txt); padding: 9px 14px; border-radius: 10px;
+      transition: 0.15s; white-space: nowrap;
+    }
+    .btn:hover { border-color: var(--acc); transform: translateY(-1px); }
+    .btn.ghost { background: transparent; }
+    .btn.on { background: linear-gradient(135deg, var(--acc), var(--acc2)); color: #04121c; font-weight: 700; border-color: transparent; }
+    .btn.danger { border-color: #5b2230; color: #ffb4b4; }
+    .btn.sm { padding: 6px 10px; font-size: 13px; border-radius: 8px; }
+    .card {
+      background: linear-gradient(180deg, var(--card), #0f1929);
+      border: 1px solid var(--line); border-radius: var(--radius); padding: 16px;
+    }
+    .grid { display: grid; gap: 14px; }
+    .depts { grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); }
+
+    /* ---------- Auth Screen ---------- */
+    .auth-wrap { min-height: 100vh; display: grid; grid-template-columns: 1.1fr 0.9fr; }
+    .auth-hero {
+      padding: 56px 48px; display: flex; flex-direction: column; justify-content: center;
+      gap: 16px;
+      background: radial-gradient(700px 380px at 20% 10%, rgba(34, 211, 238, 0.14), transparent 65%);
+    }
+    .auth-hero h1 { font-size: clamp(28px, 4vw, 44px); line-height: 1.15; }
+    .auth-hero h1 em { color: var(--acc); font-style: normal; }
+    .auth-hero p { color: var(--mut); max-width: 520px; line-height: 1.65; }
+    .auth-card {
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 46px 42px; background: linear-gradient(180deg, #0f1b2e, #0b1424);
+      border-left: 1px solid var(--line);
+    }
+    .msg { padding: 10px 12px; border-radius: 10px; font-size: 14px; margin: 12px 0; }
+    .msg.error { border: 1px solid #6b2534; background: rgba(248, 113, 113, 0.09); color: #ffc9c9; }
+    .msg.ok { border: 1px solid #1f6f52; background: rgba(52, 211, 153, 0.09); color: #a7f3d0; }
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+
+    /* ---------- Admin ---------- */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+    th { color: var(--mut); font-weight: 600; font-size: 12.5px; text-transform: uppercase; }
+    .tag { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; border: 1px solid var(--line); }
+    .tag.ok { border-color: #1f6f52; color: #6ee7b7; }
+    .tag.no { border-color: #6b2534; color: #ffb4b4; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 900px) {
+      .auth-wrap { grid-template-columns: 1fr; }
+      .auth-hero { padding: 34px 22px; }
+      .auth-card { padding: 26px 22px; border-left: none; border-top: 1px solid var(--line); }
+      .wrap { padding: 16px 12px 60px; }
+    }
+    .foot { text-align: center; padding: 26px 16px 40px; color: var(--mut); font-size: 13px; border-top: 1px solid var(--line); margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- Firebase v9 modular SDK (CDN) -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+    import {
+      getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+      signOut, onAuthStateChanged
+    } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+    import {
+      getFirestore, collection, doc, getDoc, getDocs, addDoc,
+      updateDoc, deleteDoc, query, where, orderBy, serverTimestamp
+    } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+
+    /* ============================================================
+       FIREBASE CONFIGURATION — REPLACE WITH YOUR OWN
+       ============================================================ */
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    /* ============================================================
+       DEVELOPER INFORMATION (change as needed)
+       ============================================================ */
+    const DEVELOPER = {
+      name: "Abdul",
+      title: "Full-Stack Developer & Founder of AbdulTech",
+      email: "abdul@example.com",
+      phone: "+000 000 0000",
+      github: "https://github.com/abdul",
+      location: "—"
+    };
+
+    /* ============================================================
+       APPLICATION STATE
+       ============================================================ */
+    let currentUser = null;        // Firebase Auth user
+    let userProfile = null;        // Firestore user doc (role, name)
+    let state = {
+      view: 'dept',                // dept | years | semesters | courses | admin | profile
+      deptId: null, yearId: null, semId: null, courseId: null,
+      adminTab: 'overview',
+      adminPath: { deptId: '', yearId: '', semId: '', courseId: '' }
+    };
+    let authTab = 'login';
+    let authError = '';
+    let authSuccess = '';
+
+    /* ============================================================
+       HELPER FUNCTIONS
+       ============================================================ */
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+    const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const uid = () => Math.random().toString(36).slice(2, 9);
+
+    function render() {
+      const app = $('#app');
+      if (!currentUser || !userProfile) {
+        app.innerHTML = renderAuth();
+        return;
+      }
+      app.innerHTML = `
+        <header class="topbar">
+          <div class="brand" data-action="nav" data-view="dept">
+            <span class="logo">A</span> AbdulTech
+          </div>
+          <nav>
+            <button class="btn ghost ${state.view !== 'admin' ? 'on' : ''}" data-action="nav" data-view="dept">Library</button>
+            ${userProfile.role === 'admin' ? `<button class="btn ghost ${state.view === 'admin' ? 'on' : ''}" data-action="nav" data-view="admin">Admin</button>` : ''}
+            <button class="btn ghost ${state.view === 'profile' ? 'on' : ''}" data-action="nav" data-view="profile">${esc(userProfile.name || currentUser.email)}</button>
+            <button class="btn" data-action="logout">Logout</button>
+          </nav>
+        </header>
+        <main class="wrap">${renderView()}</main>
+        <footer class="foot">
+          <div><b>AbdulTech</b> v1.0.0 · Health Sciences Learning Platform</div>
+          <div style="margin-top:6px">Developed by <b>${esc(DEVELOPER.name)}</b> — ${esc(DEVELOPER.title)}</div>
+          <div style="margin-top:4px; font-size:12px;">${esc(DEVELOPER.email)} · ${esc(DEVELOPER.github)}</div>
+        </footer>
+      `;
+    }
+
+    function renderAuth() {
+      return `
+        <div class="auth-wrap">
+          <section class="auth-hero">
+            <div class="brand"><span class="logo">A</span> AbdulTech</div>
+            <h1>Health Sciences Learning,<br><em>secured.</em></h1>
+            <p>Notes, chapter questions and video lessons for every health department — Nursing, Medicine, Pharmacy, Medical Laboratory, Midwifery, Public Health, Radiography, Physiotherapy, Anaesthesia, Dentistry, and more.</p>
+            <ul style="list-style:none;padding:0;margin:10px 0 0;display:grid;gap:9px;color:var(--mut);font-size:14.5px;">
+              <li>✓ Access-code protected registration</li>
+              <li>✓ Department → Year → Semester → Course structure</li>
+              <li>✓ Downloadable notes &amp; chapter-by-chapter questions</li>
+              <li>✓ Installable as a mobile app (PWA)</li>
+            </ul>
+            <div class="card" style="margin-top:22px;max-width:520px;padding:14px;">
+              <div style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--mut);">Developer</div>
+              <div><b>${esc(DEVELOPER.name)}</b></div>
+              <div style="color:var(--mut);font-size:13.5px;">${esc(DEVELOPER.title)}</div>
+              <div style="color:var(--mut);font-size:13px;">${esc(DEVELOPER.email)} · ${esc(DEVELOPER.phone)}</div>
+              <div style="color:var(--mut);font-size:13px;">${esc(DEVELOPER.github)}</div>
+            </div>
+          </section>
+          <section class="auth-card">
+            <div class="tabs">
+              <button class="btn ghost ${authTab === 'login' ? 'on' : ''}" data-action="auth-tab" data-tab="login">Sign in</button>
+              <button class="btn ghost ${authTab === 'register' ? 'on' : ''}" data-action="auth-tab" data-tab="register">Register</button>
+            </div>
+            ${authError ? `<div class="msg error">${esc(authError)}</div>` : ''}
+            ${authSuccess ? `<div class="msg ok">${esc(authSuccess)}</div>` : ''}
+            ${authTab === 'login' ? `
+              <form id="loginForm">
+                <label for="loginEmail">Email</label>
+                <input id="loginEmail" name="email" type="email" required placeholder="you@example.com">
+                <label for="loginPassword">Password</label>
+                <input id="loginPassword" name="password" type="password" required placeholder="••••••••">
+                <div style="height:18px"></div>
+                <button class="btn on" style="width:100%;" type="submit">Sign in securely</button>
+              </form>
+            ` : `
+              <form id="registerForm">
+                <label for="regName">Full name</label>
+                <input id="regName" name="name" required placeholder="e.g. Aisha Bello">
+                <label for="regEmail">Email</label>
+                <input id="regEmail" name="email" type="email" required placeholder="you@example.com">
+                <label for="regPassword">Password</label>
+                <input id="regPassword" name="password" type="password" required placeholder="min 8 characters">
+                <div style="height:18px"></div>
+                <button class="btn on" style="width:100%;" type="submit">Create account</button>
+              </form>
+            `}
+            <p style="font-size:12.5px;color:var(--mut);margin-top:16px;line-height:1.6;">
+              🔒 Authentication and data are secured by Firebase.
+            </p>
+          </section>
+        </div>
+      `;
+    }
+
+    function renderView() {
+      switch (state.view) {
+        case 'years': return viewYears();
+        case 'semesters': return viewSemesters();
+        case 'courses': return viewCourses();
+        case 'admin': return userProfile.role === 'admin' ? viewAdmin() : '<div class="card">Access denied.</div>';
+        case 'profile': return viewProfile();
+        default: return viewDepartments();
+      }
+    }
+
+    /* ============================================================
+       USER VIEWS (DEPARTMENTS → YEARS → SEMESTERS → COURSES)
+       ============================================================ */
+    async function viewDepartments() {
+      // Data is loaded once after login; stored in a simple in-memory cache
+      // (In a production app you would use onSnapshot for real‑time updates.)
+      const depts = await loadCollection('departments', 'order');
+      return `
+        <h2 style="font-size:22px;margin:6px 0 16px;">Welcome, ${esc(userProfile.name || currentUser.email)} 👋</h2>
+        <p style="color:var(--mut);margin-top:-8px;">Choose a health department to start learning.</p>
+        <div class="grid depts" style="margin-top:16px;">
+          ${depts.map(d => `
+            <article class="card dept" data-action="open-dept" data-id="${d.id}" style="cursor:pointer;">
+              <div style="font-size:26px;">${d.icon || '🏥'}</div>
+              <h3 style="margin:10px 0 6px;font-size:16px;">${esc(d.name)}</h3>
+              <p style="color:var(--mut);font-size:13px;">${d.yearCount || 0} years</p>
+            </article>
+          `).join('') || '<div class="card">No departments found. Please seed data.</div>'}
+        </div>
+      `;
+    }
+
+    async function viewYears() {
+      const dept = await getDoc(doc(db, 'departments', state.deptId));
+      if (!dept.exists()) return '<div class="card">Department unavailable.</div>';
+      const d = { id: dept.id, ...dept.data() };
+      const years = await queryCollection('years', 'departmentId', state.deptId, 'order');
+      return `
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+          <button class="btn sm ghost" data-action="nav" data-view="dept">← Departments</button>
+          <span style="color:var(--mut);">${esc(d.name)}</span>
+        </div>
+        <h2 style="font-size:22px;margin:6px 0 16px;">${d.icon || '📅'} ${esc(d.name)}</h2>
+        <div class="grid depts">
+          ${years.map(y => `
+            <article class="card dept" data-action="open-year" data-id="${y.id}" style="cursor:pointer;">
+              <div style="font-size:26px;">📅</div>
+              <h3 style="margin:10px 0 6px;font-size:16px;">${esc(y.name)}</h3>
+            </article>
+          `).join('') || '<div class="card">No years found.</div>'}
+        </div>
+      `;
+    }
+
+    async function viewSemesters() {
+      const year = await getDoc(doc(db, 'years', state.yearId));
+      if (!year.exists()) return '<div class="card">Year unavailable.</div>';
+      const y = { id: year.id, ...year.data() };
+      const deptSnap = await getDoc(doc(db, 'departments', y.departmentId));
+      const dept = deptSnap.exists() ? deptSnap.data() : { name: 'Department' };
+      const semesters = await queryCollection('semesters', 'yearId', state.yearId, 'order');
+      return `
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+          <button class="btn sm ghost" data-action="nav" data-view="dept">← Departments</button>
+          <button class="btn sm ghost" data-action="open-dept" data-id="${y.departmentId}">${esc(dept.name)}</button>
+          <span style="color:var(--mut);">${esc(y.name)}</span>
+        </div>
+        <h2 style="font-size:22px;margin:6px 0 16px;">${esc(dept.name)} · ${esc(y.name)}</h2>
+        <div class="grid depts">
+          ${semesters.map(s => `
+            <article class="card dept" data-action="open-sem" data-id="${s.id}" style="cursor:pointer;">
+              <div style="font-size:26px;">📚</div>
+              <h3 style="margin:10px 0 6px;font-size:16px;">${esc(s.name)}</h3>
+            </article>
+          `).join('') || '<div class="card">No semesters found.</div>'}
+        </div>
+      `;
+    }
+
+    async function viewCourses() {
+      const sem = await getDoc(doc(db, 'semesters', state.semId));
+      if (!sem.exists()) return '<div class="card">Semester unavailable.</div>';
+      const s = { id: sem.id, ...sem.data() };
+      const yearSnap = await getDoc(doc(db, 'years', s.yearId));
+      const y = yearSnap.exists() ? yearSnap.data() : { name: 'Year' };
+      const deptSnap = await getDoc(doc(db, 'departments', y.departmentId));
+      const dept = deptSnap.exists() ? deptSnap.data() : { name: 'Department' };
+      const courses = await queryCollection('courses', 'semesterId', state.semId, 'order');
+      return `
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+          <button class="btn sm ghost" data-action="nav" data-view="dept">← Departments</button>
+          <button class="btn sm ghost" data-action="open-dept" data-id="${y.departmentId}">${esc(dept.name)}</button>
+          <button class="btn sm ghost" data-action="open-year" data-id="${s.yearId}">${esc(y.name)}</button>
+          <span style="color:var(--mut);">${esc(s.name)}</span>
+        </div>
+        <h2 style="font-size:22px;margin:6px 0 16px;">${esc(s.name)} — Courses</h2>
+        <div class="grid depts">
+          ${courses.map(c => `
+            <article class="card dept" data-action="open-course" data-id="${c.id}" style="cursor:pointer;">
+              <div style="font-size:26px;">📖</div>
+              <h3 style="margin:10px 0 6px;font-size:16px;">${esc(c.title)}</h3>
+              <p style="color:var(--mut);font-size:13px;">${esc(c.code || '')}</p>
+            </article>
+          `).join('') || '<div class="card">No courses found.</div>'}
+        </div>
+      `;
+    }
+
+    function viewProfile() {
+      return `
+        <h2 style="font-size:22px;margin:6px 0 16px;">My Account</h2>
+        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
+          <div class="card">
+            <div style="font-size:12.5px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);">Profile</div>
+            <p><b>${esc(userProfile.name || '—')}</b><br><span style="color:var(--mut);">${esc(currentUser.email)}</span></p>
+            <p style="color:var(--mut);">Role: <span class="tag ${userProfile.role === 'admin' ? 'ok' : ''}">${esc(userProfile.role)}</span></p>
+          </div>
+          <div class="card">
+            <div style="font-size:12.5px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);">Developer</div>
+            <div style="display:grid;gap:6px;">
+              <div><b>${esc(DEVELOPER.name)}</b></div>
+              <div style="color:var(--mut);">${esc(DEVELOPER.title)}</div>
+              <div style="color:var(--mut);">${esc(DEVELOPER.email)}</div>
+              <div style="color:var(--mut);">${esc(DEVELOPER.phone)}</div>
+              <div style="color:var(--mut);">${esc(DEVELOPER.github)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    /* ============================================================
+       ADMIN VIEW
+       ============================================================ */
+    function viewAdmin() {
+      const tabs = [
+        ['overview', 'Overview'],
+        ['departments', 'Departments'],
+        ['years', 'Years'],
+        ['semesters', 'Semesters'],
+        ['courses', 'Courses'],
+        ['seed', 'Seed Data']
+      ];
+      return `
+        <h2 style="font-size:22px;margin:6px 0 16px;">Admin Dashboard</h2>
+        <div class="tabs">
+          ${tabs.map(([k, l]) => `<button class="btn ghost ${state.adminTab === k ? 'on' : ''}" data-action="admin-tab" data-tab="${k}">${l}</button>`).join('')}
+        </div>
+        ${adminBody()}
+      `;
+    }
+
+    function adminBody() {
+      switch (state.adminTab) {
+        case 'departments': return adminDepartments();
+        case 'years': return adminYears();
+        case 'semesters': return adminSemesters();
+        case 'courses': return adminCourses();
+        case 'seed': return adminSeed();
+        default: return adminOverview();
+      }
+    }
+
+    async function adminOverview() {
+      const deptCount = (await getDocs(collection(db, 'departments'))).size;
+      const yearCount = (await getDocs(collection(db, 'years'))).size;
+      const semCount = (await getDocs(collection(db, 'semesters'))).size;
+      const courseCount = (await getDocs(collection(db, 'courses'))).size;
+      return `
+        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));">
+          ${[
+            ['Departments', deptCount],
+            ['Years', yearCount],
+            ['Semesters', semCount],
+            ['Courses', courseCount]
+          ].map(([l, v]) => `<div class="card" style="text-align:center;"><span style="color:var(--mut);font-size:13px;">${l}</span><div style="font-size:28px;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent;">${v}</div></div>`).join('')}
+        </div>
+      `;
+    }
+
+    async function adminDepartments() {
+      const depts = await loadCollection('departments', 'order');
+      return `
+        <div class="card" style="margin-bottom:14px;">
+          <form id="addDeptForm">
+            <label>Department name</label>
+            <input name="name" required placeholder="e.g. Nursing">
+            <label>Icon (emoji)</label>
+            <input name="icon" placeholder="🩺" value="🩺">
+            <div style="height:12px;"></div>
+            <button class="btn on" type="submit">+ Add Department</button>
+          </form>
+        </div>
+        <div class="card" style="overflow:auto;">
+          <table>
+            <thead><tr><th>Icon</th><th>Name</th><th></th></tr></thead>
+            <tbody>
+              ${depts.map(d => `
+                <tr>
+                  <td>${esc(d.icon || '🏥')}</td>
+                  <td>${esc(d.name)}</td>
+                  <td style="text-align:right;"><button class="btn sm danger" data-action="del-dept" data-id="${d.id}">Delete</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    async function adminYears() {
+      const depts = await loadCollection('departments', 'order');
+      const years = await loadCollection('years', 'order');
+      return `
+        <div class="card" style="margin-bottom:14px;">
+          <form id="addYearForm">
+            <label>Department</label>
+            <select name="departmentId" required>
+              <option value="">— select —</option>
+              ${depts.map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join('')}
+            </select>
+            <label>Year name</label>
+            <input name="name" required placeholder="e.g. Year 1">
+            <div style="height:12px;"></div>
+            <button class="btn on" type="submit">+ Add Year</button>
+          </form>
+        </div>
+        <div class="card" style="overflow:auto;">
+          <table>
+            <thead><tr><th>Department</th><th>Year</th><th></th></tr></thead>
+            <tbody>
+              ${years.map(y => {
+                const dept = depts.find(d => d.id === y.departmentId);
+                return `<tr>
+                  <td>${esc(dept?.name || '—')}</td>
+                  <td>${esc(y.name)}</td>
+                  <td style="text-align:right;"><button class="btn sm danger" data-action="del-year" data-id="${y.id}">Delete</button></td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    async function adminSemesters() {
+      const years = await loadCollection('years', 'order');
+      const sems = await loadCollection('semesters', 'order');
+      return `
+        <div class="card" style="margin-bottom:14px;">
+          <form id="addSemForm">
+            <label>Year</label>
+            <select name="yearId" required>
+              <option value="">— select —</option>
+              ${years.map(y => `<option value="${y.id}">${esc(y.name)}</option>`).join('')}
+            </select>
+            <label>Semester name</label>
+            <input name="name" required placeholder="e.g. Semester 1">
+            <div style="height:12px;"></div>
+            <button class="btn on" type="submit">+ Add Semester</button>
+          </form>
+        </div>
+        <div class="card" style="overflow:auto;">
+          <table>
+            <thead><tr><th>Year</th><th>Semester</th><th></th></tr></thead>
+            <tbody>
+              ${sems.map(s => {
+                const y = years.find(x => x.id === s.yearId);
+                return `<tr>
+                  <td>${esc(y?.name || '—')}</td>
+                  <td>${esc(s.name)}</td>
+                  <td style="text-align:right;"><button class="btn sm danger" data-action="del-sem" data-id="${s.id}">Delete</button></td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    async function adminCourses() {
+      const sems = await loadCollection('semesters', 'order');
+      const courses = await loadCollection('courses', 'order');
+      return `
+        <div class="card" style="margin-bottom:14px;">
+          <form id="addCourseForm">
+            <label>Semester</label>
+            <select name="semesterId" required>
+              <option value="">— select —</option>
+              ${sems.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}
+            </select>
+            <label>Course title</label>
+            <input name="title" required placeholder="e.g. Anatomy">
+            <label>Course code</label>
+            <input name="code" placeholder="e.g. NUR110">
+            <div style="height:12px;"></div>
+            <button class="btn on" type="submit">+ Add Course</button>
+          </form>
+        </div>
+        <div class="card" style="overflow:auto;">
+          <table>
+            <thead><tr><th>Semester</th><th>Course</th><th>Code</th><th></th></tr></thead>
+            <tbody>
+              ${courses.map(c => {
+                const s = sems.find(x => x.id === c.semesterId);
+                return `<tr>
+                  <td>${esc(s?.name || '—')}</td>
+                  <td>${esc(c.title)}</td>
+                  <td>${esc(c.code || '')}</td>
+                  <td style="text-align:right;"><button class="btn sm danger" data-action="del-course" data-id="${c.id}">Delete</button></td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function adminSeed() {
+      return `
+        <div class="card">
+          <h3 style="margin-top:0;">Seed Real Data</h3>
+          <p style="color:var(--mut);font-size:14px;">Click the button below to populate Firestore with real health‑sciences departments, years, semesters, and courses. This is safe to run once; it will not duplicate existing documents.</p>
+          <button class="btn on" id="seedBtn">🚀 Seed Database</button>
+          <pre id="seedLog" style="margin-top:14px;font-size:13px;color:var(--mut);white-space:pre-wrap;"></pre>
+        </div>
+      `;
+    }
+
+    /* ============================================================
+       FIRESTORE HELPERS
+       ============================================================ */
+    async function loadCollection(colName, orderField) {
+      const q = orderField ? query(collection(db, colName), orderBy(orderField)) : collection(db, colName);
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+
+    async function queryCollection(colName, field, value, orderField) {
+      let q = query(collection(db, colName), where(field, '==', value));
+      if (orderField) q = query(q, orderBy(orderField));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+
+    /* ============================================================
+       AUTHENTICATION FLOW
+       ============================================================ */
+    async function doLogin(form) {
+      const email = form.email.value.trim();
+      const password = form.password.value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        authError = '';
+      } catch (err) {
+        authError = err.message.replace('Firebase: ', '');
+      }
+      render();
+    }
+
+    async function doRegister(form) {
+      const name = form.name.value.trim();
+      const email = form.email.value.trim();
+      const password = form.password.value;
+      if (name.length < 2) { authError = 'Please enter your full name.'; render(); return; }
+      if (password.length < 8) { authError = 'Password must be at least 8 characters.'; render(); return; }
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        // Create user profile in Firestore
+        await addDoc(collection(db, 'users'), {
+          email: email,
+          name: name,
+          role: 'user',          // default role; change to 'admin' manually for the owner
+          createdAt: serverTimestamp()
+        });
+        authSuccess = 'Account created successfully.';
+        authError = '';
+      } catch (err) {
+        authError = err.message.replace('Firebase: ', '');
+      }
+      render();
+    }
+
+    async function doLogout() {
+      await signOut(auth);
+      currentUser = null;
+      userProfile = null;
+      state = { view: 'dept', deptId: null, yearId: null, semId: null, courseId: null, adminTab: 'overview', adminPath: { deptId: '', yearId: '', semId: '', courseId: '' } };
+      render();
+    }
+
+    /* ============================================================
+       AUTH STATE OBSERVER
+       ============================================================ */
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      if (user) {
+        // Fetch user profile from Firestore
+        const q = query(collection(db, 'users'), where('email', '==', user.email));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          userProfile = { id: snap.docs[0].id, ...snap.docs[0].data() };
+        } else {
+          // Fallback profile (e.g., if created outside the app)
+          userProfile = { name: user.email, role: 'user' };
+        }
+        authTab = 'login';
+      } else {
+        userProfile = null;
+      }
+      render();
+    });
+
+    /* ============================================================
+       EVENT DELEGATION (clicks & form submissions)
+       ============================================================ */
+    document.addEventListener('click', async (e) => {
+      const el = e.target.closest('[data-action]');
+      if (!el) return;
+      const d = el.dataset;
+
+      switch (d.action) {
+        case 'auth-tab':
+          authTab = d.tab; authError = ''; authSuccess = ''; render(); break;
+        case 'logout':
+          await doLogout(); break;
+        case 'nav':
+          if (d.view === 'admin' && userProfile?.role !== 'admin') return;
+          state.view = d.view; render(); break;
+        case 'open-dept': state.deptId = d.id; state.view = 'years'; render(); break;
+        case 'open-year': state.yearId = d.id; state.view = 'semesters'; render(); break;
+        case 'open-sem': state.semId = d.id; state.view = 'courses'; render(); break;
+        case 'open-course':
+          // Course detail view will be added in a later phase.
+          alert('Course detail view will be implemented in the next phase.'); break;
+        case 'admin-tab': state.adminTab = d.tab; render(); break;
+        case 'del-dept': if (confirm('Delete this department?')) { await deleteDoc(doc(db, 'departments', d.id)); render(); } break;
+        case 'del-year': if (confirm('Delete this year?')) { await deleteDoc(doc(db, 'years', d.id)); render(); } break;
+        case 'del-sem': if (confirm('Delete this semester?')) { await deleteDoc(doc(db, 'semesters', d.id)); render(); } break;
+        case 'del-course': if (confirm('Delete this course?')) { await deleteDoc(doc(db, 'courses', d.id)); render(); } break;
+      }
+    });
+
+    document.addEventListener('submit', async (e) => {
+      const form = e.target;
+      if (!form.id) return;
+      e.preventDefault();
+
+      if (form.id === 'loginForm') return doLogin(form);
+      if (form.id === 'registerForm') return doRegister(form);
+
+      if (form.id === 'addDeptForm') {
+        const name = form.name.value.trim();
+        const icon = form.icon.value.trim() || '🏥';
+        if (!name) return;
+        await addDoc(collection(db, 'departments'), { name, icon, order: Date.now() });
+        render(); return;
+      }
+
+      if (form.id === 'addYearForm') {
+        const departmentId = form.departmentId.value;
+        const name = form.name.value.trim();
+        if (!departmentId || !name) return;
+        await addDoc(collection(db, 'years'), { departmentId, name, order: Date.now() });
+        render(); return;
+      }
+
+      if (form.id === 'addSemForm') {
+        const yearId = form.yearId.value;
+        const name = form.name.value.trim();
+        if (!yearId || !name) return;
+        await addDoc(collection(db, 'semesters'), { yearId, name, order: Date.now() });
+        render(); return;
+      }
+
+      if (form.id === 'addCourseForm') {
+        const semesterId = form.semesterId.value;
+        const title = form.title.value.trim();
+        const code = form.code.value.trim();
+        if (!semesterId || !title) return;
+        await addDoc(collection(db, 'courses'), { semesterId, title, code, order: Date.now() });
+        render(); return;
+      }
+    });
+
+    /* ============================================================
+       SEED FUNCTION (runs when the admin clicks the Seed button)
+       ============================================================ */
+    document.addEventListener('click', async (e) => {
+      if (e.target.id === 'seedBtn') {
+        const log = $('#seedLog');
+        log.textContent = 'Seeding started...\n';
+        try {
+          const deptData = [
+            { name: 'Nursing', icon: '🩺', years: 5 },
+            { name: 'Medicine & Surgery', icon: '⚕️', years: 6 },
+            { name: 'Pharmacy', icon: '💊', years: 5 },
+            { name: 'Medical Laboratory Science', icon: '🧪', years: 4 },
+            { name: 'Midwifery', icon: '🤱', years: 4 },
+            { name: 'Public Health', icon: '🌍', years: 4 },
+            { name: 'Radiography & Imaging', icon: '🩻', years: 4 },
+            { name: 'Physiotherapy', icon: '🦴', years: 4 },
+            { name: 'Anaesthesia & Critical Care', icon: '😷', years: 4 },
+            { name: 'Dentistry', icon: '🦷', years: 5 },
+            { name: 'Health Information Management', icon: '📊', years: 4 },
+            { name: 'Environmental Health', icon: '🌱', years: 4 },
+            { name: 'Nutrition & Dietetics', icon: '🥗', years: 4 }
+          ];
+          const coursePool = {
+            common: ['Anatomy', 'Physiology', 'Biochemistry', 'Medical Microbiology', 'Pathology', 'Pharmacology', 'Community Health', 'Human Nutrition', 'Research Methods', 'Medical Ethics & Professionalism', 'Health Informatics', 'Biostatistics'],
+            nursing: ['Fundamentals of Nursing', 'Medical-Surgical Nursing', 'Maternal & Child Health Nursing', 'Mental Health Nursing', 'Critical Care Nursing', 'Community Health Nursing'],
+            medicine: ['Internal Medicine', 'General Surgery', 'Paediatrics', 'Obstetrics & Gynaecology', 'Psychiatry', 'Radiology & Imaging'],
+            pharmacy: ['Pharmaceutics', 'Pharmacognosy', 'Medicinal Chemistry', 'Clinical Pharmacy', 'Pharmacy Practice', 'Toxicology'],
+            lab: ['Haematology', 'Clinical Chemistry', 'Histopathology', 'Medical Parasitology', 'Immunology', 'Blood Bank Technology'],
+            midwifery: ['Midwifery Practice', 'Antenatal Care', 'Labour & Delivery', 'Postnatal Care', 'Neonatal Care', 'Reproductive Health'],
+            publichealth: ['Epidemiology', 'Health Promotion', 'Environmental Health', 'Health Policy & Management', 'Global Health', 'Occupational Health'],
+            radiology: ['Radiographic Imaging', 'Radiation Physics', 'Cross-Sectional Anatomy', 'Radiotherapy', 'Ultrasound Imaging', 'Nuclear Medicine'],
+            physio: ['Kinesiology', 'Electrotherapy', 'Musculoskeletal Physiotherapy', 'Neurological Physiotherapy', 'Cardiopulmonary Physiotherapy', 'Exercise Physiology'],
+            anesthesia: ['Anaesthesia Equipment', 'Airway Management', 'Regional Anaesthesia', 'Critical Care Nursing', 'Pain Management', 'Pharmacology of Anaesthetics'],
+            dentistry: ['Oral Anatomy', 'Dental Materials', 'Endodontics', 'Periodontics', 'Oral Surgery', 'Orthodontics'],
+            him: ['Health Information Systems', 'Medical Coding & Classification', 'Health Records Management', 'Data Analytics in Health', 'Healthcare Quality Management', 'Telemedicine'],
+            nutrition: ['Human Nutrition', 'Dietetics', 'Nutritional Assessment', 'Food Science', 'Community Nutrition', 'Clinical Nutrition']
+          };
+
+          for (const dept of deptData) {
+            const deptRef = await addDoc(collection(db, 'departments'), {
+              name: dept.name, icon: dept.icon, order: Date.now()
+            });
+            log.textContent += `Department: ${dept.name}\n`;
+
+            for (let y = 1; y <= dept.years; y++) {
+              const yearRef = await addDoc(collection(db, 'years'), {
+                departmentId: deptRef.id, name: `Year ${y}`, order: y
+              });
+              for (let s = 1; s <= 2; s++) {
+                const semRef = await addDoc(collection(db, 'semesters'), {
+                  yearId: yearRef.id, name: `Semester ${s}`, order: s
+                });
+                // Pick 3 courses from the pool for this semester
+                const pool = [...coursePool.common, ...(coursePool[dept.name.toLowerCase().replace(/[^a-z]/g, '')] || coursePool.common)];
+                for (let c = 0; c < 3; c++) {
+                  const title = pool[(c + y + s) % pool.length];
+                  await addDoc(collection(db, 'courses'), {
+                    semesterId: semRef.id,
+                    title: title,
+                    code: `${dept.name.slice(0, 3).toUpperCase()}${y}${s}${c + 1}0`,
+                    order: c
+                  });
+                }
+              }
+            }
+          }
+          log.textContent += '\n✅ Seeding completed successfully.';
+        } catch (err) {
+          log.textContent += `\n❌ Error: ${err.message}`;
+        }
+      }
+    });
+
+    /* ============================================================
+       INITIAL RENDER (before auth state resolves)
+       ============================================================ */
+    render();
+
+    /* ============================================================
+       PWA SERVICE WORKER REGISTRATION
+       ============================================================ */
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
